@@ -27,7 +27,7 @@ jobs:
       - name: Run tests and build jar with Gradle
         run: ./gradlew clean test build
 
-      - name: Collect artifacts (jar + bat)
+      - name: Collect jar artifacts
         run: |
           mkdir -p dist
           cp build/libs/*.jar dist/
