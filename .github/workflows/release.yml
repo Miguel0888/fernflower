@@ -1,0 +1,46 @@
+name: Build and release fernflower jar
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (for Gradle & javac)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build jar with Gradle
+        run: ./gradlew clean build
+
+      - name: Collect artifacts (jar + bat)
+        run: |
+          mkdir -p dist
+          cp build/libs/*.jar dist/
+          cp fernflower.bat dist/
+          cp unzip_jars.bat dist/
+
+      - name: Create or update latest GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest master build
+          files: |
+            dist/*.jar
+            dist/*.bat
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
