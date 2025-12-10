@@ -15,32 +15,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21 (for Gradle & javac)
+      - name: Set up JDK 21 (Azul Zulu)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '21'
 
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build jar with Gradle
-        run: ./gradlew clean build
+      - name: Run tests and build jar with Gradle
+        run: ./gradlew clean test build
 
       - name: Collect artifacts (jar + bat)
         run: |
           mkdir -p dist
           cp build/libs/*.jar dist/
-          cp fernflower.bat dist/
-          cp unzip_jars.bat dist/
 
       - name: Create or update latest GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Latest master build
-          files: |
-            dist/*.jar
-            dist/*.bat
+          files: dist/*.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
