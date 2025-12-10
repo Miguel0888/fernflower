@@ -1,0 +1,35 @@
+name: Build and Release JAR
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adoptopenjdk'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Archive JAR file
+        run: |
+          mkdir -p release
+          cp build/libs/*.jar release/fernflower-latest.jar
+
+      - name: Upload JAR as Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/fernflower-latest.jar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
