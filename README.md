@@ -1,3 +1,67 @@
+# Fernflower (Fork mit GitHub-Actions-Build)
+
+Dieses Repository ist ein Fork des **originalen JetBrains-Fernflower-Decompilers**.  
+Der eigentliche Fernflower-Code ist unverändert – hinzugekommen sind nur:
+
+- Ein Build über **GitHub Actions**, der automatisch ein `fernflower.jar` erzeugt.
+- Zwei **Windows-Batchskripte**, die das Entpacken von JARs und das anschließende Decompilen automatisieren.
+
+## Automatischer Build
+
+Der Fork ist so konfiguriert, dass bei Änderungen auf dem `master`-Branch automatisch ein Build über GitHub Actions läuft und ein lauffähiges `fernflower.jar` erzeugt wird.  
+Damit entfällt das manuelle Bauen des Projekts – du kannst die Artefakte direkt aus den Actions bzw. Releases verwenden.
+
+## Batch-Skripte
+
+### `unzip_jars.bat`
+
+**Zweck:**  
+Bereitet Plugin-/JAR-Strukturen für Fernflower vor, indem alle JARs rekursiv entpackt werden.
+
+**Verhalten (vereinfacht):**
+
+- Nimmt einen **Input-Ordner** und einen **Output-Ordner** als Parameter.
+- Kopiert zuerst den kompletten Input-Ordner in den Output-Ordner.
+- Sucht im Output-Ordner rekursiv alle `*.jar`.
+- Entpackt **jede JAR in einen Unterordner**, der genauso heißt wie die JAR-Datei, nur ohne `.jar`.
+- Wiederholt den Vorgang so lange, bis keine weiteren JAR-Dateien mehr vorhanden sind.
+
+**Typischer Anwendungsfall:**
+
+- Eclipse-/RCP-Plugins oder OSGi-Bundles, bei denen im `plugins/`-Verzeichnis viele verschachtelte JARs liegen, die Fernflower als reine JAR-Dateien nicht direkt verarbeiten kann.
+
+**Beispielaufruf:**
+
+```bat
+unzip_jars.bat C:\path\to\plugins C:\path\to\unpacked
+```
+
+---
+
+### `fernflower.bat`
+
+**Zweck:**  
+Kombiniert **Entpacken und Decompilen** in einem Schritt als Komfort-Wrapper um `unzip_jars.bat` und `fernflower.jar`.
+
+**Typischer Ablauf (konzeptionell):**
+
+1. Ruft `unzip_jars.bat` auf, um alle JAR-Dateien aus einem Eingabeordner in einen Arbeitsordner zu entpacken.
+2. Startet danach `java -jar fernflower.jar ...`, um die entpackten `.class`-Dateien in `.java` zu dekompilieren.
+3. Erleichtert den Umgang mit komplexen Plugin-Ordnerstrukturen (z. B. `plugins/` eines RCP-Produkts), ohne jeden Schritt manuell ausführen zu müssen.
+
+**Beispiel (abhängig von der konkreten Parametrisierung des Skripts):**
+
+```bat
+fernflower.bat C:\path\to\plugins C:\path\to\decompiled
+```
+
+Dabei übernimmt das Skript:
+
+- Vorbereitung der Struktur (Entpacken der JARs),
+- Aufruf von Fernflower mit dem gewünschten Input- und Output-Ordner.
+
+---
+
 # Fernflower
 
 A decompiler from Java bytecode to Java.

@@ -27,16 +27,20 @@ jobs:
       - name: Build jar with Gradle
         run: ./gradlew clean build
 
-      - name: Collect jar artifact
+      - name: Collect artifacts (jar + bat)
         run: |
           mkdir -p dist
           cp build/libs/*.jar dist/
+          cp fernflower.bat dist/
+          cp unzip_jars.bat dist/
 
       - name: Create or update latest GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Latest master build
-          files: dist/*.jar
+          files: |
+            dist/*.jar
+            dist/*.bat
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
